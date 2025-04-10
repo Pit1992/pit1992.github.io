@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Google AdSense 驗證碼 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3091373500785626"
+     crossorigin="anonymous"></script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elevation Difference Calculator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>⬆️ Elevation Difference Calculator</h1>
+
+  <p><strong>Instruction:</strong> Please upload a LandXML file (e.g. exported from Civil 3D TIN surface), then enter Easting / Northing coordinates to query the elevation.</p>
+
+  <input type="file" id="xmlFile" accept=".xml" />
+  <button id="downloadXmlBtn">⬇️ Download Saved XML</button>
+  <br />
+
+  <input type="text" id="easting" placeholder="Easting" />
+  <input type="text" id="northing" placeholder="Northing" />
+  <button id="queryBtn">Query Elevation</button>
+
+  <label for="decimalSelect">Decimal Places: </label>
+  <select id="decimalSelect">
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4" selected>4</option>
+    <option value="5">5</option>
+  </select>
+
+  <p id="result"></p>
+
+  <h2>Query History</h2>
+  <button id="clearLog">🗑 Clear History</button>
+  <table id="history-table" border="1">
+    <thead>
+      <tr>
+        <th>Point ID</th>
+        <th>Easting</th>
+        <th>Northing</th>
+        <th>Elevation</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script src="script.js"></script>
+</body>
+</html>
