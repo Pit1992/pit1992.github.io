@@ -148,7 +148,7 @@ function processCSV() {
         row.insertCell().textContent = n;
         row.insertCell().textContent = origZ.toFixed(4);
         row.insertCell().textContent = interpolatedZ !== null ? interpolatedZ.toFixed(4) : "N/A";
-        row.insertCell().textContent = interpolatedZ !== null ? (interpolatedZ - origZ).toFixed(4) : "N/A";
+        row.insertCell().textContent = interpolatedZ !== null ? (origZ - interpolatedZ).toFixed(4) : "N/A";
       }
     };
     csvReader.readAsText(csvInput);
