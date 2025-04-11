@@ -3,17 +3,60 @@ body {
   padding: 20px;
 }
 
-table {
-  border-collapse: collapse;
-  margin-top: 20px;
-}
-
-th, td {
-  border: 1px solid black;
-  padding: 5px 10px;
+h1 {
+  margin-bottom: 20px;
 }
 
 input, button, select {
   margin: 5px;
-  padding: 5px;
+  padding: 6px;
+}
+
+button {
+  cursor: pointer;
+}
+
+.tabs {
+  margin-bottom: 20px;
+}
+
+.tab-btn {
+  padding: 8px 16px;
+  margin-right: 10px;
+  background-color: #eee;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.tab-btn.active {
+  background-color: #007bff;
+  color: white;
+}
+
+.tab-content {
+  margin-top: 20px;
+}
+
+/* 單點表格 */
+#history-table,
+#batch-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+th, td {
+  border: 1px solid #333;
+  padding: 6px 12px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+#batchOutputContainer {
+  overflow-x: auto;
+  margin-top: 20px;
+}
+
+#batch-table {
+  min-width: 850px;
 }
