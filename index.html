@@ -2,50 +2,88 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <!-- Google AdSense 驗證碼 -->
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3091373500785626"
-     crossorigin="anonymous"></script>
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Elevation Difference Calculator</title>
+  <title>Elevation Tool</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>⬆️ Elevation Difference Calculator</h1>
+  <h1>📍 Elevation Tool</h1>
 
-  <p><strong>Instruction:</strong> Please upload a LandXML file (e.g. exported from Civil 3D TIN surface), then enter Easting / Northing coordinates to query the elevation.</p>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="single">🔎 Single Point</button>
+    <button class="tab-btn" data-tab="batch">📄 Batch Points</button>
+  </div>
 
-  <input type="file" id="xmlFile" accept=".xml" />
-  <button id="downloadXmlBtn">⬇️ Download Saved XML</button>
-  <br />
+  <!-- Single Point Tab -->
+  <div class="tab-content" id="single" style="display: block;">
+    <p><strong>Instruction:</strong> Upload a LandXML file (TIN surface), enter Easting / Northing and query elevation.</p>
 
-  <input type="text" id="easting" placeholder="Easting" />
-  <input type="text" id="northing" placeholder="Northing" />
-  <button id="queryBtn">Query Elevation</button>
+    <label>
+      Upload LandXML file:
+      <input type="file" id="xmlFile" accept=".xml" />
+    </label>
+    <br /><br />
 
-  <label for="decimalSelect">Decimal Places: </label>
-  <select id="decimalSelect">
-    <option value="2">2</option>
-    <option value="3">3</option>
-    <option value="4" selected>4</option>
-    <option value="5">5</option>
-  </select>
+    <input type="number" id="easting" placeholder="Easting" />
+    <input type="number" id="northing" placeholder="Northing" />
+    <label for="decimalSelect">Decimal Places:</label>
+    <select id="decimalSelect">
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4" selected>4</option>
+      <option value="5">5</option>
+    </select>
+    <button onclick="findElevation()">Query Elevation</button>
 
-  <p id="result"></p>
+    <p id="result"></p>
+    <button onclick="clearHistory()">Clear History</button>
 
-  <h2>Query History</h2>
-  <button id="clearLog">🗑 Clear History</button>
-  <table id="history-table" border="1">
-    <thead>
+    <table id="history-table" border="1">
       <tr>
         <th>Point ID</th>
         <th>Easting</th>
         <th>Northing</th>
         <th>Elevation</th>
       </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+    </table>
+  </div>
+
+  <!-- Batch Points Tab -->
+  <div class="tab-content" id="batch" style="display: none;">
+    <p><strong>Instruction:</strong> Upload a LandXML and a CSV file with format: ID,E,N,Elevation</p>
+
+    <label>
+      Upload LandXML file (Design Surface):
+      <input type="file" id="xmlFileBatch" accept=".xml" />
+    </label>
+    <br /><br />
+    <label>
+      Upload CSV file (Points to Compare):
+      <input type="file" id="csvFile" accept=".csv" />
+    </label>
+    <br /><br />
+
+    <button onclick="processCSV()">Calculate Differences</button>
+    <button onclick="copyBatchTable()">📋 Copy Table</button>
+
+    <div id="batchOutputContainer">
+      <table id="batch-table" border="1">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Easting</th>
+            <th>Northing</th>
+            <th>Original Z</th>
+            <th>Interpolated Z</th>
+            <th>ΔZ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- dynamically inserted rows -->
+        </tbody>
+      </table>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>
