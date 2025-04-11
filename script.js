@@ -1,49 +1,53 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const tabs = document.querySelectorAll(".tab-btn");
-  const contents = document.querySelectorAll(".tab-content");
-  tabs.forEach(btn => {
-    btn.addEventListener("click", () => {
-      tabs.forEach(b => b.classList.remove("active"));
-      contents.forEach(c => c.style.display = "none");
-      btn.classList.add("active");
-      document.getElementById(btn.dataset.tab).style.display = "block";
-    });
-  });
+let xmlDoc = null;
+let pointIdCounter = 1;
+let decimalPlaces = 4;
+
+// 單點 XML 載入
+document.getElementById("xmlFile").addEventListener("change", function (event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const parser = new DOMParser();
+    xmlDoc = parser.parseFromString(e.target.result, "text/xml");
+    alert("XML file loaded!");
+  };
+  reader.readAsText(file);
 });
 
-let xmlDoc = null;
-
 function findElevation() {
-  const fileInput = document.getElementById("xmlFile");
-  if (!fileInput.files[0]) return alert("Please upload a LandXML file.");
-  const reader = new FileReader();
-  reader.onload = () => {
-    const parser = new DOMParser();
-    xmlDoc = parser.parseFromString(reader.result, "text/xml");
-    const e = parseFloat(document.getElementById("easting").value);
-    const n = parseFloat(document.getElementById("northing").value);
-    const decimalPlaces = parseInt(document.getElementById("decimalSelect").value);
-    if (isNaN(e) || isNaN(n)) return alert("Please enter valid E/N.");
-    const points = Array.from(xmlDoc.getElementsByTagName("P")).map(p => {
-      const [y, x, z] = p.textContent.trim().split(" ").map(parseFloat);
-      return { x, y, z };
-    });
-    const triangles = Array.from(xmlDoc.getElementsByTagName("F")).map(f => {
-      const [a, b, c] = f.textContent.trim().split(" ").map(i => points[parseInt(i) - 1]);
-      return [a, b, c];
-    });
+  if (!xmlDoc) {
+    alert("Please upload a LandXML file first.");
+    return;
+  }
 
-    for (const tri of triangles) {
-      const z = interpolateZ(tri, e, n);
-      if (z !== null) {
-        document.getElementById("result").textContent = "Elevation: " + z.toFixed(decimalPlaces);
-        addToTable(e, n, z.toFixed(decimalPlaces));
-        return;
-      }
+  const e = parseFloat(document.getElementById("easting").value);
+  const n = parseFloat(document.getElementById("northing").value);
+  decimalPlaces = parseInt(document.getElementById("decimalSelect").value);
+  if (isNaN(e) || isNaN(n)) {
+    alert("Please enter valid Easting and Northing.");
+    return;
+  }
+
+  const points = Array.from(xmlDoc.getElementsByTagName("P")).map(p => {
+    const [y, x, z] = p.textContent.trim().split(" ").map(parseFloat);
+    return { id: p.getAttribute("id"), x, y, z };
+  });
+
+  const triangles = Array.from(xmlDoc.getElementsByTagName("F")).map(f => {
+    const [a, b, c] = f.textContent.trim().split(" ").map(Number);
+    return [points[a - 1], points[b - 1], points[c - 1]];
+  });
+
+  for (const tri of triangles) {
+    const z = interpolateZ(tri, e, n);
+    if (z !== null) {
+      addToHistory(e, n, z);
+      return;
     }
-    alert("Point not in range.");
-  };
-  reader.readAsText(fileInput.files[0]);
+  }
+
+  alert("Point is outside the surface.");
 }
 
 function interpolateZ([p1, p2, p3], x, y) {
@@ -51,83 +55,114 @@ function interpolateZ([p1, p2, p3], x, y) {
   const a = ((p2.y - p3.y) * (x - p3.x) + (p3.x - p2.x) * (y - p3.y)) / detT;
   const b = ((p3.y - p1.y) * (x - p3.x) + (p1.x - p3.x) * (y - p3.y)) / detT;
   const c = 1 - a - b;
-  if (a >= 0 && b >= 0 && c >= 0) return a * p1.z + b * p2.z + c * p3.z;
+
+  if (a >= 0 && b >= 0 && c >= 0) {
+    return a * p1.z + b * p2.z + c * p3.z;
+  }
   return null;
 }
 
-function addToTable(e, n, z) {
+function addToHistory(e, n, z) {
   const table = document.getElementById("history-table");
   const row = table.insertRow();
-  row.insertCell().textContent = table.rows.length - 1;
-  row.insertCell().textContent = e;
-  row.insertCell().textContent = n;
-  row.insertCell().textContent = z;
+  const id = pointIdCounter++;
+
+  row.insertCell().textContent = id;
+  row.insertCell().textContent = e.toFixed(decimalPlaces);
+  row.insertCell().textContent = n.toFixed(decimalPlaces);
+  row.insertCell().textContent = z.toFixed(decimalPlaces);
 }
 
 function clearHistory() {
   const table = document.getElementById("history-table");
   while (table.rows.length > 1) table.deleteRow(1);
+  pointIdCounter = 1;
 }
 
+// 🔄 分頁切換功能
+document.addEventListener("DOMContentLoaded", () => {
+  const tabButtons = document.querySelectorAll(".tab-btn");
+  const tabContents = document.querySelectorAll(".tab-content");
+
+  tabButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      tabButtons.forEach(b => b.classList.remove("active"));
+      tabContents.forEach(c => (c.style.display = "none"));
+
+      btn.classList.add("active");
+      const tab = btn.getAttribute("data-tab");
+      document.getElementById(tab).style.display = "block";
+    });
+  });
+});
+
+// 🧮 批次比對：CSV 與 XML
 function processCSV() {
-  const xmlFile = document.getElementById("xmlFileBatch").files[0];
-  const csvFile = document.getElementById("csvFile").files[0];
-  if (!xmlFile || !csvFile) return alert("Please upload both files.");
+  const xmlInput = document.getElementById("xmlFileBatch").files[0];
+  const csvInput = document.getElementById("csvFile").files[0];
 
-  const reader1 = new FileReader();
-  const reader2 = new FileReader();
+  if (!xmlInput || !csvInput) {
+    alert("Please upload both XML and CSV files.");
+    return;
+  }
 
-  reader1.onload = () => {
+  const reader = new FileReader();
+  reader.onload = function (e) {
     const parser = new DOMParser();
-    const xml = parser.parseFromString(reader1.result, "text/xml");
-    const points = Array.from(xml.getElementsByTagName("P")).map(p => {
-      const [y, x, z] = p.textContent.trim().split(" ").map(parseFloat);
-      return { x, y, z };
-    });
-    const triangles = Array.from(xml.getElementsByTagName("F")).map(f => {
-      const [a, b, c] = f.textContent.trim().split(" ").map(i => points[parseInt(i) - 1]);
-      return [a, b, c];
-    });
+    xmlDoc = parser.parseFromString(e.target.result, "text/xml");
 
-    reader2.onload = () => {
-      const tbody = document.querySelector("#batch-table tbody");
-      tbody.innerHTML = "";
-      const lines = reader2.result.trim().split("\n");
+    const csvReader = new FileReader();
+    csvReader.onload = function (e) {
+      const lines = e.target.result.trim().split("\n");
+      const outputTable = document.querySelector("#batch-table tbody");
+      outputTable.innerHTML = ""; // 清除舊資料
 
-      lines.forEach((line, index) => {
-        const [id, e, n, originalZ] = line.split(",").map(x => x.trim());
-        if (index === 0 && isNaN(parseFloat(e))) return;
-        if (!id || !e || !n || !originalZ) return;
-        const x = parseFloat(e);
-        const y = parseFloat(n);
-        const z = parseFloat(originalZ);
+      const points = Array.from(xmlDoc.getElementsByTagName("P")).map(p => {
+        const [y, x, z] = p.textContent.trim().split(" ").map(parseFloat);
+        return { id: p.getAttribute("id"), x, y, z };
+      });
+
+      const triangles = Array.from(xmlDoc.getElementsByTagName("F")).map(f => {
+        const [a, b, c] = f.textContent.trim().split(" ").map(Number);
+        return [points[a - 1], points[b - 1], points[c - 1]];
+      });
+
+      for (let i = 0; i < lines.length; i++) {
+        const [id, e, n, z] = lines[i].split(",").map(val => val.trim());
+        const eNum = parseFloat(e);
+        const nNum = parseFloat(n);
+        const origZ = parseFloat(z);
+        let interpolatedZ = null;
+
         for (const tri of triangles) {
-          const interpZ = interpolateZ(tri, x, y);
-          if (interpZ !== null) {
-            const diff = z - interpZ;
-            const row = tbody.insertRow();
-            row.insertCell().textContent = id;
-            row.insertCell().textContent = x;
-            row.insertCell().textContent = y;
-            row.insertCell().textContent = z.toFixed(4);
-            row.insertCell().textContent = interpZ.toFixed(4);
-            row.insertCell().textContent = diff.toFixed(4);
-            return;
+          const result = interpolateZ(tri, eNum, nNum);
+          if (result !== null) {
+            interpolatedZ = result;
+            break;
           }
         }
-      });
+
+        const row = outputTable.insertRow();
+        row.insertCell().textContent = id;
+        row.insertCell().textContent = e;
+        row.insertCell().textContent = n;
+        row.insertCell().textContent = origZ.toFixed(4);
+        row.insertCell().textContent = interpolatedZ !== null ? interpolatedZ.toFixed(4) : "N/A";
+        row.insertCell().textContent = interpolatedZ !== null ? (interpolatedZ - origZ).toFixed(4) : "N/A";
+      }
     };
-    reader2.readAsText(csvFile);
+    csvReader.readAsText(csvInput);
   };
-  reader1.readAsText(xmlFile);
+  reader.readAsText(xmlInput);
 }
 
+// 📋 複製表格
 function copyBatchTable() {
-  const table = document.getElementById("batch-table");
-  let text = "";
-  for (let row of table.rows) {
-    const cells = Array.from(row.cells).map(cell => cell.textContent);
-    text += cells.join("\t") + "\n";
-  }
-  navigator.clipboard.writeText(text).then(() => alert("Copied to clipboard!"));
+  const table = document.querySelector("#batch-table");
+  const rows = Array.from(table.rows);
+  const text = rows.map(row => Array.from(row.cells).map(cell => cell.textContent).join("\t")).join("\n");
+
+  navigator.clipboard.writeText(text).then(() => {
+    alert("Copied to clipboard!");
+  });
 }
