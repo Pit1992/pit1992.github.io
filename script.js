@@ -143,12 +143,22 @@ function processCSV() {
         }
 
         const row = outputTable.insertRow();
-        row.insertCell().textContent = id;
-        row.insertCell().textContent = e;
-        row.insertCell().textContent = n;
-        row.insertCell().textContent = origZ.toFixed(4);
-        row.insertCell().textContent = interpolatedZ !== null ? interpolatedZ.toFixed(4) : "N/A";
-        row.insertCell().textContent = interpolatedZ !== null ? (origZ - interpolatedZ).toFixed(4) : "N/A";
+	row.insertCell().textContent = id;
+	row.insertCell().textContent = e;
+	row.insertCell().textContent = n;
+	row.insertCell().textContent = origZ.toFixed(4);
+	
+	if (interpolatedZ !== null) {
+	  row.insertCell().textContent = interpolatedZ.toFixed(4);
+	  const dz = origZ - interpolatedZ;
+	  row.insertCell().textContent = dz.toFixed(4);
+	  row.insertCell().textContent = `${dz >= 0 ? "+" : ""}${Math.round(dz * 1000)}`;
+	} else {
+	  row.insertCell().textContent = "N/A";
+	  row.insertCell().textContent = "N/A";
+	  row.insertCell().textContent = "N/A";
+	}
+
       }
     };
     csvReader.readAsText(csvInput);
