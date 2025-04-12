@@ -60,3 +60,9 @@ th, td {
 #batch-table {
   min-width: 850px;
 }
+
+#batch-table th,
+#batch-table td {
+  min-width: 100px;
+}
+
