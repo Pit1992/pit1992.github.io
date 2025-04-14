@@ -19,8 +19,8 @@
     <p><strong>Instruction:</strong> Upload a LandXML file (TIN surface), enter Easting / Northing and query elevation.</p>
     <input type="file" id="xmlFile" accept=".xml" />
     <br />
-    <input type="number" id="easting" placeholder="Easting" />
-    <input type="number" id="northing" placeholder="Northing" />
+    <input type="text" id="easting" placeholder="Easting" inputmode="decimal" pattern="[0-9]*[.]?[0-9]*" />
+    <input type="text" id="northing" placeholder="Northing" inputmode="decimal" pattern="[0-9]*[.]?[0-9]*" />
     <label for="decimalSelect">Decimal Places:</label>
     <select id="decimalSelect">
       <option value="2">2</option>
