@@ -6,6 +6,8 @@
   <title>Elevation Tool</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <!-- Google AdSense Verification -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3091373500785626" crossorigin="anonymous"></script>
 </head>
 <body>
   <h1>📍 Elevation Tool</h1>
@@ -15,6 +17,7 @@
     <button class="tab-btn" data-tab="batch">📄 Batch Points</button>
   </div>
 
+  <!-- Single Point Tab -->
   <div class="tab-content" id="single" style="display: block;">
     <p><strong>Instruction:</strong> Upload a LandXML file (TIN surface), enter Easting / Northing and query elevation.</p>
     <input type="file" id="xmlFile" accept=".xml" />
@@ -32,18 +35,24 @@
     <p id="result"></p>
     <button onclick="clearHistory()">Clear History</button>
     <table id="history-table" border="1">
-      <tr><th>Point ID</th><th>Easting</th><th>Northing</th><th>Elevation</th></tr>
+      <tr>
+        <th>Point ID</th>
+        <th>Easting</th>
+        <th>Northing</th>
+        <th>Elevation</th>
+      </tr>
     </table>
   </div>
 
+  <!-- Batch Point Tab -->
   <div class="tab-content" id="batch" style="display: none;">
     <p><strong>Instruction:</strong> Upload a LandXML and a CSV file with format: ID,E,N,Elevation</p>
     <label>Upload LandXML file (Design Surface):</label>
     <input type="file" id="xmlFileBatch" accept=".xml" />
-    <br/>
+    <br />
     <label>Upload CSV file (Points to Compare):</label>
     <input type="file" id="csvFile" accept=".csv" />
-    <br/>
+    <br />
     <button onclick="processCSV()">Calculate Differences</button>
     <button onclick="copyBatchTable()">📋 Copy Table</button>
     <div id="batchOutputContainer">
