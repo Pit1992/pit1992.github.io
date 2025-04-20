@@ -91,10 +91,23 @@
   </div>
 
   <hr />
-  <section class="tool-description">
+
+  <!-- 說明區：Single -->
+  <section id="desc-single" class="tool-description" style="display: block;">
     <h2>About This Tool</h2>
     <p>
-      The Elevation Tool allows users to upload LandXML surface files (e.g., from Civil 3D) and perform elevation interpolation by querying single points or comparing with a list of existing elevation records. This tool is useful for land surveyors, civil engineers, and GIS professionals who need to calculate elevation differences quickly and visually.
+      This mode allows you to upload a LandXML file and manually input Easting / Northing coordinates
+      to get interpolated elevation values on the surface.
+      It is ideal for quick point queries during surveying or field verification.
+    </p>
+  </section>
+
+  <!-- 說明區：Batch -->
+  <section id="desc-batch" class="tool-description" style="display: none;">
+    <h2>About This Tool</h2>
+    <p>
+      This mode is used to compare CSV survey points against a LandXML surface to identify elevation differences (ΔZ).
+      Upload both files and view calculated results. Useful for quality control and progress checks in civil engineering.
     </p>
   </section>
 
@@ -103,5 +116,26 @@
   </footer>
 
   <script src="script.js"></script>
+  <script>
+    // 加上切換說明的功能
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const tab = this.dataset.tab;
+
+        // 切換 Tab 內容
+        document.querySelectorAll('.tab-content').forEach(div => {
+          div.style.display = div.id === tab ? 'block' : 'none';
+        });
+
+        // 切換說明
+        document.getElementById('desc-single').style.display = tab === 'single' ? 'block' : 'none';
+        document.getElementById('desc-batch').style.display = tab === 'batch' ? 'block' : 'none';
+
+        // 更新 active 樣式
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+  </script>
 </body>
 </html>
