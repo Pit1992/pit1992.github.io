@@ -115,7 +115,7 @@ function processCSV() {
     csvReader.onload = function (e) {
       const lines = e.target.result.trim().split("\n");
       const outputTable = document.querySelector("#batch-table tbody");
-      outputTable.innerHTML = ""; // 清除舊資料
+      outputTable.innerHTML = "";
 
       const points = Array.from(xmlDoc.getElementsByTagName("P")).map(p => {
         const [y, x, z] = p.textContent.trim().split(" ").map(parseFloat);
@@ -143,22 +143,21 @@ function processCSV() {
         }
 
         const row = outputTable.insertRow();
-	row.insertCell().textContent = id;
-	row.insertCell().textContent = e;
-	row.insertCell().textContent = n;
-	row.insertCell().textContent = origZ.toFixed(4);
-	
-	if (interpolatedZ !== null) {
-	  row.insertCell().textContent = interpolatedZ.toFixed(4);
-	  const dz = origZ - interpolatedZ;
-	  row.insertCell().textContent = dz.toFixed(4);
-	  row.insertCell().textContent = `${dz >= 0 ? "+" : ""}${Math.round(dz * 1000)}`;
-	} else {
-	  row.insertCell().textContent = "N/A";
-	  row.insertCell().textContent = "N/A";
-	  row.insertCell().textContent = "N/A";
-	}
+        row.insertCell().textContent = id;
+        row.insertCell().textContent = e;
+        row.insertCell().textContent = n;
+        row.insertCell().textContent = origZ.toFixed(4);
 
+        if (interpolatedZ !== null) {
+          row.insertCell().textContent = interpolatedZ.toFixed(4);
+          const dz = origZ - interpolatedZ;
+          row.insertCell().textContent = dz.toFixed(4);
+          row.insertCell().textContent = `${dz >= 0 ? "+" : ""}${Math.round(dz * 1000)}`;
+        } else {
+          row.insertCell().textContent = "N/A";
+          row.insertCell().textContent = "N/A";
+          row.insertCell().textContent = "N/A";
+        }
       }
     };
     csvReader.readAsText(csvInput);
